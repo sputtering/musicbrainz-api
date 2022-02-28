@@ -2,37 +2,39 @@ import DateTimeFormat = Intl.DateTimeFormat;
 import { IFormData, Includes } from './musicbrainz-api';
 
 export interface IPeriod {
-  'begin': string,
-  'ended': boolean,
-  'end': string
+  'begin': string;
+  'ended': boolean;
+  'end': string;
 }
 
-export interface IArea {
-  id: string,
-  'iso-3166-1-codes': string[],
-  name: string,
-  'sort-name': string,
-  disambiguation: string
+export interface IEntity {
+  id: string;
 }
 
-export interface IAlias {
-  name: string,
-  'sort-name': string,
-  ended: boolean,
-  'type-id': string,
-  type: string,
-  locale: string,
-  primary: string,
-  begin: string,
-  end: string
+export interface IArea extends IEntity {
+  'iso-3166-1-codes': string[];
+  name: string;
+  'sort-name': string;
+  disambiguation: string;
+}
+
+export interface IAlias extends IEntity {
+  name: string;
+  'sort-name': string;
+  ended: boolean;
+  'type-id': string;
+  type: string;
+  locale: string;
+  primary: string;
+  begin: string;
+  end: string;
 }
 
 export interface IMatch {
-  score: number // ToDo: provide feedback: should be a number
+  score: number; // ToDo: provide feedback: should be a number
 }
 
-export interface IArtist {
-  id: string;
+export interface IArtist extends IEntity {
   name: string;
   disambiguation: string;
   'sort-name': string;
@@ -62,10 +64,28 @@ export interface IArtistCredit {
   name: string;
 }
 
+export interface IEvent extends IEntity {
+  cancelled: boolean;
+  type: string;
+  'life-span': IPeriod;
+  disambiguation: string;
+  'type-id': string;
+  time: string;
+  setlist: string;
+  name: string;
+}
+
+export interface IInstrument extends IEntity {
+  disambiguation: string;
+  name: string;
+  'type-id': string;
+  type: string;
+  description: string;
+}
+
 export type ReleaseQuality = 'normal';  // ToDo
 
-export interface IRelease {
-  id: string;
+export interface IRelease extends IEntity {
   title: string;
   'text-representation': { 'language': string, 'script': string },
   disambiguation: string;
@@ -93,8 +113,7 @@ export interface IReleaseEvent {
 
 export type MediaFormatType = 'Digital Media'; // ToDo
 
-export interface IRecording {
-  id: string;
+export interface IRecording  extends IEntity {
   video: boolean;
   length: number;
   title: string;
@@ -106,8 +125,7 @@ export interface IRecording {
   aliases?: IAlias[];
 }
 
-export interface ITrack {
-  id: string;
+export interface ITrack extends IEntity{
   position: number;
   recording: IRecording;
   number: string; // in JSON, this is a string field
@@ -134,8 +152,7 @@ export interface ICoverArtArchive {
   back: boolean;
 }
 
-export interface IReleaseGroup {
-  id: string;
+export interface IReleaseGroup  extends IEntity {
   count: number;
   title: string;
   'primary-type': string;
@@ -196,30 +213,27 @@ export interface IRelation {
   begin?: null | object;
   'target-type'?: 'url';
   'type-id': string;
-  url?: IURL;
+  url?: IUrl;
   release?: IRelease;
-}
-
-export interface IURL {
-  id: string;
-  resource: string;
 }
 
 export interface IRelationList {
   relations: IRelation[];
 }
 
-export interface IWork {
-  id: string;
+export interface IWork extends IEntity {
   title: string;
 }
 
-export interface ILabel {
-  id: string;
+export interface ILabel extends IEntity {
   name: string;
 }
 
-export interface IUrl {
+export interface IPlace extends IEntity {
+  name: string;
+}
+
+export interface IUrl extends IEntity {
   id: string,
   resource: string,
   'relation-list': IRelationList[];
@@ -450,4 +464,176 @@ export interface ILinkedEntitiesUrl {
   resource?: string;
 }
 
+/**
+ * Browse artist query <entity>: <MBID>
+ * https://wiki.musicbrainz.org/MusicBrainz_API#Linked_entities
+ */
+export interface IBrowseAreasQuery extends IPagination {
+  collection?: string;
+}
 
+/**
+ * Browse artist query <entity>: <MBID>
+ * https://wiki.musicbrainz.org/MusicBrainz_API#Linked_entities
+ */
+export interface IBrowseArtistsQuery extends IPagination {
+  area?: string;
+  collection?: string;
+  recording?: string;
+  release?: string;
+  'release-group'?: string;
+  work?: string;
+}
+
+/**
+ * Browse collection query <entity>: <MBID>
+ * https://wiki.musicbrainz.org/MusicBrainz_API#Linked_entities
+ */
+export interface IBrowseCollectionsQuery extends IPagination {
+  area?: string;
+  artist?: string;
+  editor?: string;
+  event?: string;
+  label?: string;
+  place?: string;
+  recording?: string;
+  release?: string;
+  'release-group'?: string;
+  work?: string;
+}
+
+/**
+ * Browse events query <entity>: <MBID>
+ * https://wiki.musicbrainz.org/MusicBrainz_API#Linked_entities
+ */
+export interface IBrowseEventsQuery extends IPagination {
+  area?: string;
+  artist?: string;
+  collection?: string;
+  place?: string;
+}
+
+/**
+ * Browse instruments query <entity>: <MBID>
+ * https://wiki.musicbrainz.org/MusicBrainz_API#Linked_entities
+ */
+export interface IBrowseInstrumentsQuery extends IPagination {
+  collection?: string;
+}
+
+/**
+ * Browse labels query <entity>: <MBID>
+ * https://wiki.musicbrainz.org/MusicBrainz_API#Linked_entities
+ */
+export interface IBrowseLabelsQuery extends IPagination {
+  area?: string;
+  collection?: string;
+  release?: string;
+}
+
+/**
+ * Browse places query <entity>: <MBID>
+ * https://wiki.musicbrainz.org/MusicBrainz_API#Linked_entities
+ */
+export interface IBrowsePlacesQuery extends IPagination {
+  area?: string;
+  collection?: string;
+}
+
+/**
+ * Browse release query <entity>: <MBID>
+ * https://wiki.musicbrainz.org/MusicBrainz_API#Linked_entities
+ */
+export interface IBrowseReleasesQuery extends IPagination {
+  area?: string;
+  artist?: string;
+  editor?: string;
+  event?: string;
+  label?: string;
+  place?: string;
+  recording?: string;
+  release?: string;
+  'release-group'?: string;
+  work?: string;
+}
+
+/**
+ * Browse release query <entity>: <MBID>
+ */
+export interface IReleaseGroupsQuery extends IPagination {
+  artist?: string;
+  collection?: string;
+  release?: string;
+}
+
+export interface IBrowseAreasResult {
+  area: IArea;
+  'area-count': number;
+  'area-offset': number;
+}
+
+export interface IBrowseArtistsResult {
+  artists: IArtist[];
+  'artist-count': number;
+  'artist-offset': number;
+}
+
+export interface IBrowseCollectionsResult {
+  collections: IArtist[];
+  'collection-count': number;
+  'collection-offset': number;
+}
+
+export interface IBrowseEventsResult {
+  events: IArtist[];
+  'event-count': number;
+  'event-offset': number;
+}
+
+export interface IBrowseInstrumentsResult {
+  instruments: IArtist[];
+  'instrument-count': number;
+  'instrument-offset': number;
+}
+
+export interface IBrowseLabelsResult {
+  label: IArtist[];
+  'label-count': number;
+  'label-offset': number;
+}
+
+export interface IBrowsePlacesResult {
+  place: IArtist[];
+  'place-count': number;
+  'place-offset': number;
+}
+
+export interface IBrowseRecordingsResult {
+  recording: IRecording[];
+  'recording-count': number;
+  'recording-offset': number;
+}
+
+export interface IBrowseReleasesResult {
+  releases: IRelease[];
+  'release-count': number;
+  'release-offset': number;
+}
+
+export interface IBrowseReleaseGroupsResult {
+  'release-groups': IReleaseGroupsQuery[];
+  'release-group-count': number;
+  'release-group-offset': number;
+}
+
+export interface IBrowseSeriesResult {
+  series: IReleaseGroupsQuery[];
+  'series-count': number;
+  'series-offset': number;
+}
+
+export interface IBrowseWorksResult {
+  works: IReleaseGroupsQuery[];
+  'work-count': number;
+  'work-offset': number;
+}

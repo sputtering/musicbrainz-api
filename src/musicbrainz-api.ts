@@ -215,7 +215,7 @@ export class MusicBrainzApi {
    * @param mbid
    * @param inc
    */
-  public getEntity<T>(entity: mb.EntityType, mbid: string, inc: Includes[] = []): Promise<T> {
+  public lookupEntity<T>(entity: mb.EntityType, mbid: string, inc: Includes[] = []): Promise<T> {
     return this.restGet<T>(`/${entity}/${mbid}`, {inc: inc.join(' ')});
   }
 
@@ -224,8 +224,8 @@ export class MusicBrainzApi {
    * @param areaId Area MBID
    * @param inc Sub-queries
    */
-  public getArea(areaId: string, inc: Includes[] = []): Promise<mb.IArea> {
-    return this.getEntity<mb.IArea>('area', areaId, inc);
+  public lookupArea(areaId: string, inc: Includes[] = []): Promise<mb.IArea> {
+    return this.lookupEntity<mb.IArea>('area', areaId, inc);
   }
 
   /**
@@ -233,8 +233,35 @@ export class MusicBrainzApi {
    * @param artistId Artist MBID
    * @param inc Sub-queries
    */
-  public getArtist(artistId: string, inc: Includes[] = []): Promise<mb.IArtist> {
-    return this.getEntity<mb.IArtist>('artist', artistId, inc);
+  public lookupArtist(artistId: string, inc: Includes[] = []): Promise<mb.IArtist> {
+    return this.lookupEntity<mb.IArtist>('artist', artistId, inc);
+  }
+
+  /**
+   * Lookup instrument
+   * @param artistId Instrument MBID
+   * @param inc Sub-queries
+   */
+  public lookupInstrument(instrumentId: string, inc: Includes[] = []): Promise<mb.IInstrument> {
+    return this.lookupEntity<mb.IInstrument>('instrument', instrumentId, inc);
+  }
+
+  /**
+   * Lookup label
+   * @param labelId Area MBID
+   * @param inc Sub-queries
+   */
+  public lookupLabel(labelId: string, inc: Includes[] = []): Promise<mb.ILabel> {
+    return this.lookupEntity<mb.ILabel>('label', labelId, inc);
+  }
+
+  /**
+   * Lookup place
+   * @param placeId Area MBID
+   * @param inc Sub-queries
+   */
+  public lookupPlace(placeId: string, inc: Includes[] = []): Promise<mb.IPlace> {
+    return this.lookupEntity<mb.IPlace>('place', placeId, inc);
   }
 
   /**
@@ -243,8 +270,8 @@ export class MusicBrainzApi {
    * @param inc Include: artist-credits, labels, recordings, release-groups, media, discids, isrcs (with recordings)
    * ToDo: ['recordings', 'artists', 'artist-credits', 'isrcs', 'url-rels', 'release-groups']
    */
-  public getRelease(releaseId: string, inc: Includes[] = []): Promise<mb.IRelease> {
-    return this.getEntity<mb.IRelease>('release', releaseId, inc);
+  public lookupRelease(releaseId: string, inc: Includes[] = []): Promise<mb.IRelease> {
+    return this.lookupEntity<mb.IRelease>('release', releaseId, inc);
   }
 
   /**
@@ -252,24 +279,16 @@ export class MusicBrainzApi {
    * @param releaseGroupId Release-group MBID
    * @param inc Include: ToDo
    */
-  public getReleaseGroup(releaseGroupId: string, inc: Includes[] = []): Promise<mb.IReleaseGroup> {
-    return this.getEntity<mb.IReleaseGroup>('release-group', releaseGroupId, inc);
+  public lookupReleaseGroup(releaseGroupId: string, inc: Includes[] = []): Promise<mb.IReleaseGroup> {
+    return this.lookupEntity<mb.IReleaseGroup>('release-group', releaseGroupId, inc);
   }
 
   /**
    * Lookup work
    * @param workId Work MBID
    */
-  public getWork(workId: string): Promise<mb.IWork> {
-    return this.getEntity<mb.IWork>('work', workId);
-  }
-
-  /**
-   * Lookup label
-   * @param labelId Label MBID
-   */
-  public getLabel(labelId: string): Promise<mb.ILabel> {
-    return this.getEntity<mb.ILabel>('label', labelId);
+  public lookupWork(workId: string): Promise<mb.IWork> {
+    return this.lookupEntity<mb.IWork>('work', workId);
   }
 
   /**
@@ -277,9 +296,132 @@ export class MusicBrainzApi {
    * @param recordingId Label MBID
    * @param inc Include: artist-credits, isrcs
    */
-  public getRecording(recordingId: string, inc: Includes[] = []): Promise<mb.IRecording> {
-    return this.getEntity<mb.IRecording>('recording', recordingId, inc);
+  public lookupRecording(recordingId: string, inc: Includes[] = []): Promise<mb.IRecording> {
+    return this.lookupEntity<mb.IRecording>('recording', recordingId, inc);
   }
+
+  // -----------------------------------------------------------------------------------------------------------------
+  // Browse functions
+  // -----------------------------------------------------------------------------------------------------------------
+  // https://wiki.musicbrainz.org/MusicBrainz_API#Browse
+  // https://wiki.musicbrainz.org/MusicBrainz_API#Linked_entities
+  // For example: http://musicbrainz.org/ws/2/release?label=47e718e1-7ee4-460c-b1cc-1192a841c6e5&offset=12&limit=2
+
+  /**
+   * Generic browse function
+   * https://wiki.musicbrainz.org/Development/JSON_Web_Service#Browse_Requests
+   * @param entity MusicBrainz entity
+   * @param query Query, like: {<entity>: <MBID:}
+   */
+  public browseEntity<T>(entity: mb.EntityType, query?: { [key: string]: any; }): Promise<T> {
+    return this.restGet<T>(`/${entity}`, query);
+  }
+
+  /**
+   * Browse areas
+   * @param query Query, like: {<entity>: <MBID:}
+   */
+  public browseAreas(query?: mb.IBrowseAreasQuery): Promise<mb.IBrowseAreasResult> {
+    return this.browseEntity<mb.IBrowseAreasResult>('area', query);
+  }
+
+  /**
+   * Browse artists
+   * @param query Query, like: {<entity>: <MBID:}
+   */
+  public browseArtists(query?: mb.IBrowseArtistsQuery): Promise<mb.IBrowseArtistsResult> {
+    return this.browseEntity<mb.IBrowseArtistsResult>('artist', query);
+  }
+
+  /**
+   * Browse collections
+   * @param query Query, like: {<entity>: <MBID:}
+   */
+  public browseCollections(query?: mb.IBrowseCollectionsQuery): Promise<mb.IBrowseCollectionsResult> {
+    return this.browseEntity<mb.IBrowseCollectionsResult>('collection', query);
+  }
+
+  /**
+   * Browse events
+   * @param query Query, like: {<entity>: <MBID:}
+   */
+  public browseEvents(query?: mb.IBrowseEventsQuery): Promise<mb.IBrowseEventsResult> {
+    return this.browseEntity<mb.IBrowseEventsResult>('event', query);
+  }
+
+  /**
+   * Browse instruments
+   * @param query Query, like: {<entity>: <MBID:}
+   */
+  public browseInstruments(query?: mb.IBrowseInstrumentsQuery): Promise<mb.IBrowseInstrumentsResult> {
+    return this.browseEntity<mb.IBrowseInstrumentsResult>('instrument', query);
+  }
+
+  /**
+   * Browse labels
+   * @param query Query, like: {<entity>: <MBID:}
+   */
+  public browseLabels(query?: mb.IBrowseLabelsQuery): Promise<mb.IBrowseLabelsResult> {
+    return this.browseEntity<mb.IBrowseLabelsResult>('label', query);
+  }
+
+  /**
+   * Browse places
+   * @param query Query, like: {<entity>: <MBID:}
+   */
+  public browsePlaces(query?: mb.IBrowsePlacesQuery): Promise<mb.IBrowsePlacesResult> {
+    return this.browseEntity<mb.IBrowsePlacesResult>('place', query);
+  }
+
+  /**
+   * Browse recordings
+   * @param query Query, like: {<entity>: <MBID:}
+   */
+  public browseRecordings(query?: { [key: string]: any; }): Promise<mb.IBrowseRecordingsResult> {
+    return this.browseEntity<mb.IBrowseRecordingsResult>('recording', query);
+  }
+
+  /**
+   * Browse releases
+   * @param query Query, like: {<entity>: <MBID:}
+   */
+  public browseReleases(query?: mb.IBrowseReleasesQuery): Promise<mb.IBrowseReleasesResult> {
+    return this.browseEntity<mb.IBrowseReleasesResult>('release', query);
+  }
+
+  /**
+   * Browse release-groups
+   * @param query Query, like: {<entity>: <MBID:}
+   */
+  public browseReleaseGroups(query?: mb.IReleaseGroupsQuery): Promise<mb.IBrowseReleaseGroupsResult> {
+    return this.browseEntity<mb.IBrowseReleaseGroupsResult>('release-group', query);
+  }
+
+  /**
+   * Browse series
+   * @param query Query, like: {<entity>: <MBID:}
+   */
+  public browseSeries(query?: mb.IReleaseGroupsQuery): Promise<mb.IBrowseSeriesResult> {
+    return this.browseEntity<mb.IBrowseSeriesResult>('series', query);
+  }
+
+  /**
+   * Browse works
+   * @param query Query, like: {<entity>: <MBID:}
+   */
+  public browseWorks(query?: { [key: string]: any; }): Promise<mb.IBrowseWorksResult> {
+    return this.browseEntity<mb.IBrowseWorksResult>('work', query);
+  }
+
+  /**
+   * Browse URLs
+   * @param query Query, like: {<entity>: <MBID:}
+   */
+  public browseUrls(query?: { [key: string]: any; }): Promise<mb.IUrl> {
+    return this.browseEntity<mb.IUrl>('url', query);
+  }
+
+  // ---------------------------------------------------------------------------
 
   public async postRecording(xmlMetadata: XmlMetadata): Promise<void> {
     return this.post('recording', xmlMetadata);
